@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="string_1">Select the platform you like :</string>
+    <string name="string_2">Gender</string>
+    <string-array name="country">
+        <item>Viet Nam</item>
+        <item>China</item>
+        <item>Malaysia</item>
+        <item>Japan</item>
+        <item>Korean</item>
+        <item>Singapore</item>
+    </string-array>
+    <string-array name="university">
+        <item>PTIT</item>
+        <item>HUST</item>
+        <item>HAU</item>
+        <item>FTU</item>
+        <item>NEU</item>
+        <item>NUCE</item>
+    </string-array>
 </resources>
