@@ -4,15 +4,83 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:layout_constraintVertical_chainStyle="spread"
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/text_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="@string/text_bmi_caculator"
+        android:textSize="@dimen/text_content_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.2" />
 
+    <TextView
+        android:id="@+id/label_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:text="@string/text_enter_height"
+        android:textSize="@dimen/text_label_size"
+        app:layout_constraintEnd_toStartOf="@id/edit_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_content" />
+
+    <EditText
+        android:id="@+id/edit_height"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_label_size"
+        app:layout_constraintBottom_toBottomOf="@id/label_height"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/label_height"
+        app:layout_constraintTop_toTopOf="@id/label_height" />
+
+    <TextView
+        android:id="@+id/label_weight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="@string/text_enter_weight"
+        android:textSize="@dimen/text_label_size"
+        app:layout_constraintEnd_toStartOf="@id/edit_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_height" />
+
+    <EditText
+        android:id="@+id/edit_weight"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_label_size"
+        app:layout_constraintBottom_toBottomOf="@id/label_weight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/label_weight"
+        app:layout_constraintTop_toTopOf="@id/label_weight" />
+
+    <Button
+        android:id="@+id/btn_calc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#127EDC"
+        android:text="@string/text_calc_bmi"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toStartOf="@id/text_result"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label_weight" />
+
+    <TextView
+        android:id="@+id/text_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/text_calc"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@id/btn_calc"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_calc"
+        app:layout_constraintTop_toTopOf="@id/btn_calc" />
 </androidx.constraintlayout.widget.ConstraintLayout>
