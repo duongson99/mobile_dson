@@ -60,4 +60,7 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         listJob.remove(position);
         notifyItemChanged(position);
     }
+    public void updateList(Job job){
+        listJob.add(job);
+    }
 }

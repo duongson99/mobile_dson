@@ -2,20 +2,25 @@ package com.appteam.myapplication;
 
 import android.net.Uri;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.io.Serializable;
 import java.util.Date;
-
+@Entity
 public class Job implements Serializable {
+    @PrimaryKey(autoGenerate = true)
+    private int uid;
     private String name;
     private double salary;
     private Uri image;
-    private Date date_created;
+    private String date_created;
     private boolean activated;
 
     public Job() {
     }
 
-    public Job(String name, double salary, Date date_created, boolean activated) {
+    public Job(String name, double salary, String date_created, boolean activated) {
         this.name = name;
         this.salary = salary;
         this.date_created = date_created;
@@ -46,11 +51,11 @@ public class Job implements Serializable {
         this.image = image;
     }
 
-    public Date getDate_created() {
+    public String getDate_created() {
         return date_created;
     }
 
-    public void setDate_created(Date date_created) {
+    public void setDate_created(String date_created) {
         this.date_created = date_created;
     }
 
@@ -60,5 +65,13 @@ public class Job implements Serializable {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public int getUid() {
+        return uid;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
     }
 }
