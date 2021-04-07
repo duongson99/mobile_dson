@@ -18,6 +18,8 @@ import android.widget.FrameLayout;
 import com.appteam.myapplication.adapter.JobAdapter;
 import com.appteam.myapplication.model.Job;
 
+import timber.log.Timber;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,PassData {
     Button btnAdd;
     FrameLayout fragmentContainer;
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onPassData(Job job) {
+        Timber.d("Init AppLog");
         btnAdd.setVisibility(View.VISIBLE);
         jobAdapter.addList(job);
         jobAdapter.notifyDataSetChanged();
