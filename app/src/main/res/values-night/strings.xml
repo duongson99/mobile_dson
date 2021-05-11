@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_add">Add</string>
+    <string name="date">Date Picker</string>
+    <string name="item_name">Item Name</string>
+    <string name="price">Price</string>
+    <string name="rating">Rating</string>
 </resources>
