@@ -1,5 +1,6 @@
 package com.appteam.myapplication.database;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -45,7 +46,7 @@ public class OrderDatabase extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " +ORDER_TABLE_NAME);
         onCreate(db);
     }
-    public boolean insertOrder(Order order){
+    public void insertOrder(Order order){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(ORDER_COLUMN_ITEM_NAME,order.getItemName());
@@ -54,12 +55,11 @@ public class OrderDatabase extends SQLiteOpenHelper {
         contentValues.put(ORDER_COLUMN_RATING,order.getRating());
         if(db.insert(ORDER_TABLE_NAME, null, contentValues) == -1){
             db.close();
-            return false;
+            return;
         }
         db.close();
-        return true;
     }
-    public boolean updateOrder(Order order){
+    public void updateOrder(Order order){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(ORDER_COLUMN_ITEM_NAME,order.getItemName());
@@ -68,21 +68,20 @@ public class OrderDatabase extends SQLiteOpenHelper {
         contentValues.put(ORDER_COLUMN_RATING,order.getRating());
         if(db.update(ORDER_TABLE_NAME, contentValues, "id = ?", new String[]{Integer.toString(order.getId())}) != -1){
             db.close();
-            return true;
+            return;
         }
         db.close();
-        return false;
     }
-    public Integer deleteOrder(Order order){
+    public void deleteOrder(Order order){
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(ORDER_TABLE_NAME,
+        db.delete(ORDER_TABLE_NAME,
                 "id = ?",
                 new String[]{Integer.toString(order.getId())});
     }
     public ArrayList<Order> getAllOrder(){
         ArrayList<Order> listOrder = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from "+ORDER_TABLE_NAME,null);
+        @SuppressLint("Recycle") Cursor res = db.rawQuery("select * from "+ORDER_TABLE_NAME,null);
         res.moveToFirst();
         while (!res.isAfterLast()){
             listOrder.add(new Order(
@@ -100,7 +99,7 @@ public class OrderDatabase extends SQLiteOpenHelper {
     public ArrayList<Order> searchOrder(String s){
         ArrayList<Order> listOrder = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from "+ORDER_TABLE_NAME +" where "+ORDER_COLUMN_ITEM_NAME+" like '%"+s+"%'",null);
+        @SuppressLint("Recycle") Cursor res = db.rawQuery("select * from "+ORDER_TABLE_NAME +" where "+ORDER_COLUMN_ITEM_NAME+" like '%"+s+"%'",null);
         res.moveToFirst();
         while (!res.isAfterLast()){
             listOrder.add(new Order(

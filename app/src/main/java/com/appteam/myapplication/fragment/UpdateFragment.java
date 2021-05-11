@@ -63,12 +63,7 @@ public class UpdateFragment extends Fragment {
             OrderDatabase.getInstance(requireContext()).updateOrder(orderDetail);
             Navigation.findNavController(binding.getRoot()).navigateUp();
         });
-        binding.editRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            @Override
-            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                orderDetail.setRating(rating);
-            }
-        });
+        binding.editRating.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> orderDetail.setRating(rating));
     }
 
     private void initView() {

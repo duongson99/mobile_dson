@@ -59,11 +59,6 @@ public class AddFragment extends Fragment {
             OrderDatabase.getInstance(requireContext()).insertOrder(orderAdd);
             Navigation.findNavController(binding.getRoot()).navigateUp();
         });
-        binding.editRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            @Override
-            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                orderAdd.setRating(rating);
-            }
-        });
+        binding.editRating.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> orderAdd.setRating(rating));
     }
 }

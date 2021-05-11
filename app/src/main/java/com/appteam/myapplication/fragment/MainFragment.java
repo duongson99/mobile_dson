@@ -36,12 +36,7 @@ public class MainFragment extends Fragment implements OnItemClick{
     }
 
     private void setListeners() {
-        binding.btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Navigation.findNavController(binding.getRoot()).navigate(R.id.action_mainFragment_to_addFragment);
-            }
-        });
+        binding.btnAdd.setOnClickListener(v -> Navigation.findNavController(binding.getRoot()).navigate(R.id.action_mainFragment_to_addFragment));
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
