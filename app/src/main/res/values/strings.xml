@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="text_add">Add</string>
+    <string name="playlist">Play List</string>
+    <string name="chat">Chat</string>
+    <string name="setting">Settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

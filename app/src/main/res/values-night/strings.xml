@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_add">Add</string>
+    <string name="playlist">Play List</string>
+    <string name="chat">Chat</string>
+    <string name="setting">Settings</string>
 </resources>
