@@ -60,6 +60,8 @@ public class UpdateFragment extends Fragment {
             Navigation.findNavController(binding.getRoot()).navigateUp();
         });
         binding.btnUpdate.setOnClickListener(v -> {
+            orderDetail.setItemName(binding.editName.getText().toString());
+            orderDetail.setPrice(Double.parseDouble(binding.editPrice.getText().toString()));
             OrderDatabase.getInstance(requireContext()).updateOrder(orderDetail);
             Navigation.findNavController(binding.getRoot()).navigateUp();
         });
