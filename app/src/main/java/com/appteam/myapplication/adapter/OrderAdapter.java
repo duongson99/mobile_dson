@@ -1,5 +1,8 @@
 package com.appteam.myapplication.adapter;
 
+import android.content.Context;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,23 +14,40 @@ import com.appteam.myapplication.R;
 import com.appteam.myapplication.databinding.ItemOrderBinding;
 import com.appteam.myapplication.fragment.OnItemClick;
 import com.appteam.myapplication.model.Order;
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import io.reactivex.Completable;
+import io.reactivex.disposables.CompositeDisposable;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
+    private Context context;
 
+
+    FirebaseStorage storage;
     private ArrayList<Order> listOrder;
 
     public void setListOrder(ArrayList<Order> listOrder) {
         this.listOrder = listOrder;
     }
-
+    private CompositeDisposable compositeDisposable;
     private OnItemClick onItemClick;
-    public OrderAdapter(ArrayList<Order> listOrder, OnItemClick onItemClick) {
+    public OrderAdapter(ArrayList<Order> listOrder, OnItemClick onItemClick,Context context) {
         this.listOrder = listOrder;
         this.onItemClick = onItemClick;
+        this.context = context;
+        compositeDisposable = new CompositeDisposable();
     }
 
     @NonNull
@@ -55,10 +75,31 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             binding = itemView;
         }
         public void bind(Order order){
+
+            storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReference();
+            final StorageReference ref = storageRef.child("images/"+order.getId()+".jpg");
+
+            ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Log.d("AppLog",uri.toString());
+                    Glide.with(context)
+                            .load(uri)
+                            .into(binding.imageOrder);
+                    if(listOrder.size()>0 && order.getId()==listOrder.get(listOrder.size()-1).getId()){
+                        onItemClick.stopLoading();
+                    }
+                }
+
+            });
+
+
+
             binding.itemName.setText(order.getItemName());
-            binding.date.setText(order.getDatePicker());
-            binding.price.setText(String.valueOf(order.getPrice()));
-            binding.rating.setText(String.valueOf(order.getRating()));
+            binding.price.setText(order.getPrice() +" VND");
+//            Log.d("AppLog",s.getPath());
+//            binding.imageOrder.setImageURI(s);
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

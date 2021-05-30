@@ -7,14 +7,27 @@
     app:layout_constraintHorizontal_chainStyle="spread"
     tools:context=".fragment.UpdateFragment">
 
+    <TextView
+        android:id="@+id/header_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update Order"
+        android:textColor="@color/purple_500"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <GridLayout
+        android:id="@+id/grid_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="2"
         android:orientation="horizontal"
         android:rowCount="4"
         android:useDefaultMargins="true"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/header_update">
 
         <TextView
             android:layout_width="wrap_content"
@@ -76,6 +89,14 @@
 
     </GridLayout>
 
+    <ImageView
+        android:id="@+id/image_order_update"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="20dp"
+        android:src="@drawable/deafult"
+        app:layout_constraintBottom_toTopOf="@id/btn_delete"
+        app:layout_constraintTop_toBottomOf="@id/grid_data" />
 
     <Button
         android:id="@+id/btn_delete"

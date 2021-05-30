@@ -1,6 +1,7 @@
 package com.appteam.myapplication.model;
 
 import android.annotation.SuppressLint;
+import android.net.Uri;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -15,6 +16,15 @@ public class Order implements Serializable {
 
     public Order() {
     }
+
+    public Order(int id, String itemName, String datePicker, Double price, float rating) {
+        this.id = id;
+        this.itemName = itemName;
+        this.datePicker = datePicker;
+        this.price = price;
+        this.rating = rating;
+    }
+
 
     public Order(int id, String itemName, String datePicker, Double price, int rating) {
         this.id = id;

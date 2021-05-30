@@ -1,7 +1,9 @@
 package com.appteam.myapplication.fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
@@ -30,13 +32,14 @@ public class MainFragment extends Fragment implements OnItemClick{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentMainBinding.inflate(inflater,container,false);
+        binding.progressbar.setVisibility(View.VISIBLE);
         setUpRecyclerView();
         setListeners();
         return binding.getRoot();
     }
 
     private void setListeners() {
-        binding.btnAdd.setOnClickListener(v -> Navigation.findNavController(binding.getRoot()).navigate(R.id.action_mainFragment_to_addFragment));
+        binding.fabAdd.setOnClickListener(v -> Navigation.findNavController(binding.getRoot()).navigate(R.id.action_mainFragment_to_addFragment));
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -55,7 +58,7 @@ public class MainFragment extends Fragment implements OnItemClick{
     }
 
     private void setUpRecyclerView() {
-        adapter = new OrderAdapter(OrderDatabase.getInstance(requireContext()).getAllOrder(),this);
+        adapter = new OrderAdapter(OrderDatabase.getInstance(requireContext()).getAllOrder(),this,getContext());
         binding.recyclerOrder.setAdapter(adapter);
         binding.recyclerOrder.setLayoutManager(new LinearLayoutManager(requireContext()));
     }
@@ -65,5 +68,10 @@ public class MainFragment extends Fragment implements OnItemClick{
         Bundle bundle = new Bundle();
         bundle.putSerializable("order",order);
         Navigation.findNavController(binding.getRoot()).navigate(R.id.action_mainFragment_to_updateFragment,bundle);
+    }
+
+    @Override
+    public void stopLoading() {
+        binding.progressbar.setVisibility(View.GONE);
     }
 }

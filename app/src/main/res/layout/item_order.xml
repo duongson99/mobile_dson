@@ -4,12 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
-    android:backgroundTint="@color/teal_200"
     app:cardCornerRadius="10dp">
+
+    <ImageView
+        android:textAlignment="center"
+        android:id="@+id/image_order"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/deafult" />
 
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:backgroundTint="#81B5540C"
         android:columnCount="2"
         android:orientation="horizontal"
         android:padding="5dp">
@@ -20,14 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:text="@string/item_name"
-            android:textSize="24sp" />
-
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:text="@string/item_name"
+            android:textColor="@color/white"
             android:textSize="24sp" />
 
         <TextView
@@ -35,13 +37,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
+            android:textColor="@color/white"
             android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/rating"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
-            android:textSize="24sp" />
     </GridLayout>
 </androidx.cardview.widget.CardView>
