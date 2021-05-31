@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +41,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     public void setListOrder(ArrayList<Order> listOrder) {
         this.listOrder = listOrder;
+
     }
     private CompositeDisposable compositeDisposable;
     private OnItemClick onItemClick;
@@ -48,6 +50,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         this.onItemClick = onItemClick;
         this.context = context;
         compositeDisposable = new CompositeDisposable();
+        Log.d("AppLog",listOrder.size()+"");
+        if(listOrder.isEmpty()){
+            onItemClick.stopLoading();
+            Toast.makeText(context,"There is no data here! Click button to add new!",Toast.LENGTH_SHORT).show();
+        }
     }
 
     @NonNull
@@ -60,6 +67,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull OrderViewHolder holder, int position) {
+
         holder.bind(listOrder.get(position));
     }
 

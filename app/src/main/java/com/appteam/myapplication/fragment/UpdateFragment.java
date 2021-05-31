@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RatingBar;
+import android.widget.Toast;
 
 import com.appteam.myapplication.R;
 import com.appteam.myapplication.database.OrderDatabase;
@@ -44,6 +45,8 @@ public class UpdateFragment extends Fragment {
     private String thumbnail;
     FirebaseStorage storage;
     StorageReference mountainImagesRef;
+    StorageReference storageRef;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +57,7 @@ public class UpdateFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentUpdateBinding.inflate(inflater, container, false);
+        storageRef = storage.getReference();
         orderDetail = new Order();
         orderDetail = (Order) getArguments().getSerializable("order");
         initView();
@@ -76,13 +80,14 @@ public class UpdateFragment extends Fragment {
         });
         binding.btnDelete.setOnClickListener(v -> {
             OrderDatabase.getInstance(requireContext()).deleteOrder(orderDetail);
+            StorageReference desertRef = storageRef.child("images/" + orderDetail.getId() + ".jpg");
+            desertRef.delete().addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Delete Successfully", Toast.LENGTH_SHORT).show()).addOnFailureListener(exception -> Toast.makeText(getContext(), "Delete Failed", Toast.LENGTH_SHORT).show());
             Navigation.findNavController(binding.getRoot()).navigateUp();
         });
         binding.btnUpdate.setOnClickListener(v -> {
             orderDetail.setItemName(binding.editName.getText().toString());
             orderDetail.setPrice(Double.parseDouble(binding.editPrice.getText().toString()));
-            StorageReference storageRef = storage.getReference();
-            mountainImagesRef = storageRef.child("images/"+orderDetail.getId()+".jpg");
+            mountainImagesRef = storageRef.child("images/" + orderDetail.getId() + ".jpg");
             uploadImage();
             OrderDatabase.getInstance(requireContext()).updateOrder(orderDetail);
             Navigation.findNavController(binding.getRoot()).navigateUp();
@@ -102,12 +107,12 @@ public class UpdateFragment extends Fragment {
         binding.editRating.setRating(orderDetail.getRating());
         storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference();
-        final StorageReference ref = storageRef.child("images/"+orderDetail.getId()+".jpg");
+        final StorageReference ref = storageRef.child("images/" + orderDetail.getId() + ".jpg");
 
         ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
-                Log.d("AppLog",uri.toString());
+                Log.d("AppLog", uri.toString());
                 Glide.with(getContext())
                         .load(uri)
                         .into(binding.imageOrderUpdate);
@@ -115,15 +120,17 @@ public class UpdateFragment extends Fragment {
 
         });
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-        if(resultCode == RESULT_OK){
-            if(requestCode == RESULT_LOAD_IMG){
+        if (resultCode == RESULT_OK) {
+            if (requestCode == RESULT_LOAD_IMG) {
                 Uri uri = data.getData();
                 binding.imageOrderUpdate.setImageURI(uri);
             }
         }
     }
+
     private void uploadImage() {
         binding.imageOrderUpdate.setDrawingCacheEnabled(true);
         binding.imageOrderUpdate.buildDrawingCache();
