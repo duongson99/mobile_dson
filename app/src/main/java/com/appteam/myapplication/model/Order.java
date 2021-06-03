@@ -8,38 +8,33 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Order implements Serializable {
-    private int id;
     private String itemName;
     private String datePicker;
-    private Double price;
-    private float rating;
+    private Long price;
+    private Long rating;
+    private Long thumbnail;
+
+    public Order(String itemName, String datePicker, Long price, Long rating, Long thumbnail) {
+        this.itemName = itemName;
+        this.datePicker = datePicker;
+        this.price = price;
+        this.rating = rating;
+        this.thumbnail = thumbnail;
+    }
 
     public Order() {
     }
 
-    public Order(int id, String itemName, String datePicker, Double price, float rating) {
-        this.id = id;
-        this.itemName = itemName;
-        this.datePicker = datePicker;
-        this.price = price;
+    public void setRating(Long rating) {
         this.rating = rating;
     }
 
-
-    public Order(int id, String itemName, String datePicker, Double price, int rating) {
-        this.id = id;
-        this.itemName = itemName;
-        this.datePicker = datePicker;
-        this.price = price;
-        this.rating = rating;
+    public Long getThumbnail() {
+        return thumbnail;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    public void setThumbnail(Long thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
     public String getItemName() {
@@ -59,19 +54,16 @@ public class Order implements Serializable {
         this.datePicker = sdf.format(datePicker);
     }
 
-    public Double getPrice() {
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(Long price) {
         this.price = price;
     }
 
-    public Float getRating() {
+    public Long getRating() {
         return rating;
     }
 
-    public void setRating(Float rating) {
-        this.rating = rating;
-    }
 }

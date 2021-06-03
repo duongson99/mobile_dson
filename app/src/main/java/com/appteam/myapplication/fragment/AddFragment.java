@@ -16,53 +16,71 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 
 import com.appteam.myapplication.R;
-import com.appteam.myapplication.database.OrderDatabase;
-import com.appteam.myapplication.databinding.FragmentAddBinding;
 import com.appteam.myapplication.model.Order;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.logging.Logger;
-
-import javax.xml.transform.Result;
 
 import static android.app.Activity.RESULT_OK;
 
 public class AddFragment extends Fragment {
     private static final int RESULT_LOAD_IMG = 1234;
-    private FragmentAddBinding binding;
     Order orderAdd;
     FirebaseStorage storage;
     StorageReference mountainImagesRef;
     String thumbnail;
+    EditText editDate, editName, editPrice;
+    RatingBar ratingBar;
+    ImageView imageOrder;
+    Button btnAdd;
+    View view;
+    private DatabaseReference mDatabase;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = FragmentAddBinding.inflate(inflater, container, false);
+        view = inflater.inflate(R.layout.fragment_add, container, false);
         storage = FirebaseStorage.getInstance();
         orderAdd = new Order();
+        initView(view);
         setListeners();
-        return binding.getRoot();
+        return view;
+    }
+
+    private void initView(View view) {
+        editDate = view.findViewById(R.id.edit_date);
+        editName = view.findViewById(R.id.edit_name);
+        editPrice = view.findViewById(R.id.edit_price);
+        ratingBar = view.findViewById(R.id.edit_rating);
+        imageOrder = view.findViewById(R.id.image_order);
+        btnAdd = view.findViewById(R.id.btn_add);
     }
 
     private void setListeners() {
-        binding.editDate.setOnClickListener(v -> {
+        editDate.setOnClickListener(v -> {
             Calendar now = Calendar.getInstance();
             new DatePickerDialog(requireContext(),
                     (view, year, month, dayOfMonth) -> {
@@ -70,21 +88,24 @@ public class AddFragment extends Fragment {
                         now.set(Calendar.MONTH, month);
                         now.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                         orderAdd.setDatePicker(now.getTime());
-                        binding.editDate.setText(orderAdd.getDatePicker());
+                        editDate.setText(orderAdd.getDatePicker());
                     }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH))
                     .show();
         });
-        binding.btnAdd.setOnClickListener(v -> {
-            orderAdd.setItemName(binding.editName.getText().toString());
-            orderAdd.setPrice(Double.parseDouble(binding.editPrice.getText().toString()));
-            long id = OrderDatabase.getInstance(requireContext()).insertOrder(orderAdd);
+        btnAdd.setOnClickListener(v -> {
+            orderAdd.setItemName(editName.getText().toString());
+            orderAdd.setPrice(Long.parseLong(editPrice.getText().toString()));
+            Calendar calendar = Calendar.getInstance();
+            FirebaseUser userCurrent = FirebaseAuth.getInstance().getCurrentUser();
+            orderAdd.setThumbnail(calendar.getTimeInMillis());
+            mDatabase.child(userCurrent.getUid()).child(calendar.getTimeInMillis()+"").setValue(orderAdd);
             StorageReference storageRef = storage.getReference();
-            mountainImagesRef = storageRef.child("images/"+id+".jpg");
+            mountainImagesRef = storageRef.child("images/" +userCurrent.getUid()+"/" +orderAdd.getThumbnail()+ ".jpg");
             uploadImage();
-            Navigation.findNavController(binding.getRoot()).navigateUp();
+
         });
-        binding.editRating.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> orderAdd.setRating(rating));
-        binding.imageOrder.setOnClickListener(v -> {
+        ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> orderAdd.setRating((long)rating));
+        imageOrder.setOnClickListener(v -> {
             Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
             photoPickerIntent.setType("image/*");
             startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
@@ -92,9 +113,9 @@ public class AddFragment extends Fragment {
     }
 
     private void uploadImage() {
-        binding.imageOrder.setDrawingCacheEnabled(true);
-        binding.imageOrder.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) binding.imageOrder.getDrawable()).getBitmap();
+        imageOrder.setDrawingCacheEnabled(true);
+        imageOrder.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable) imageOrder.getDrawable()).getBitmap();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
@@ -108,20 +129,19 @@ public class AddFragment extends Fragment {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
+                Navigation.findNavController(view).navigateUp();
             }
         });
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-        if(resultCode == RESULT_OK){
-            if(requestCode == RESULT_LOAD_IMG){
+        if (resultCode == RESULT_OK) {
+            if (requestCode == RESULT_LOAD_IMG) {
                 Uri uri = data.getData();
-                Log.d("AppLog",uri.getPath().toString());
+                Log.d("AppLog", uri.getPath().toString());
                 thumbnail = uri.toString();
-                binding.imageOrder.setImageURI(uri);
+                imageOrder.setImageURI(uri);
             }
         }
     }

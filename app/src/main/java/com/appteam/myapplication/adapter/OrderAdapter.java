@@ -20,6 +20,8 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -27,6 +29,7 @@ import com.google.firebase.storage.UploadTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import io.reactivex.Completable;
@@ -37,24 +40,23 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
 
     FirebaseStorage storage;
-    private ArrayList<Order> listOrder;
+    private List<Order> listOrder =  new ArrayList<>();
 
-    public void setListOrder(ArrayList<Order> listOrder) {
+    public void setListOrder(List<Order> listOrder) {
         this.listOrder = listOrder;
-
-    }
-    private CompositeDisposable compositeDisposable;
-    private OnItemClick onItemClick;
-    public OrderAdapter(ArrayList<Order> listOrder, OnItemClick onItemClick,Context context) {
-        this.listOrder = listOrder;
-        this.onItemClick = onItemClick;
-        this.context = context;
-        compositeDisposable = new CompositeDisposable();
         Log.d("AppLog",listOrder.size()+"");
         if(listOrder.isEmpty()){
             onItemClick.stopLoading();
             Toast.makeText(context,"There is no data here! Click button to add new!",Toast.LENGTH_SHORT).show();
         }
+
+    }
+    private CompositeDisposable compositeDisposable;
+    private OnItemClick onItemClick;
+    public OrderAdapter(OnItemClick onItemClick,Context context) {
+        this.onItemClick = onItemClick;
+        this.context = context;
+        compositeDisposable = new CompositeDisposable();
     }
 
     @NonNull
@@ -67,12 +69,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull OrderViewHolder holder, int position) {
-
         holder.bind(listOrder.get(position));
     }
 
     @Override
     public int getItemCount() {
+
         return listOrder.size();
     }
 
@@ -83,31 +85,28 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             binding = itemView;
         }
         public void bind(Order order){
-
+            Log.d("AppLog",order.toString());
+            FirebaseUser userCurrent = FirebaseAuth.getInstance().getCurrentUser();
             storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
-            final StorageReference ref = storageRef.child("images/"+order.getId()+".jpg");
+            StorageReference mountainImagesRef = storageRef.child("images/" +userCurrent.getUid()+"/" +order.getThumbnail()+ ".jpg");
 
-            ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            mountainImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
                 public void onSuccess(Uri uri) {
                     Log.d("AppLog",uri.toString());
                     Glide.with(context)
                             .load(uri)
                             .into(binding.imageOrder);
-                    if(listOrder.size()>0 && order.getId()==listOrder.get(listOrder.size()-1).getId()){
+                    if(listOrder.size()>0 && order.getThumbnail().equals(listOrder.get(listOrder.size() - 1).getThumbnail())){
                         onItemClick.stopLoading();
                     }
                 }
 
             });
 
-
-
             binding.itemName.setText(order.getItemName());
             binding.price.setText(order.getPrice() +" VND");
-//            Log.d("AppLog",s.getPath());
-//            binding.imageOrder.setImageURI(s);
             binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

@@ -2,7 +2,6 @@ package com.appteam.myapplication.fragment;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -17,56 +16,74 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
 import com.appteam.myapplication.R;
-import com.appteam.myapplication.database.OrderDatabase;
-import com.appteam.myapplication.databinding.FragmentUpdateBinding;
 import com.appteam.myapplication.model.Order;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 
 
 public class UpdateFragment extends Fragment {
     private static final int RESULT_LOAD_IMG = 2345;
-    private FragmentUpdateBinding binding;
+    View view;
     private Order orderDetail;
     private String thumbnail;
     FirebaseStorage storage;
     StorageReference mountainImagesRef;
     StorageReference storageRef;
-
+    EditText editDate, editName, editPrice;
+    RatingBar ratingBar;
+    ImageView imageOrder;
+    Button btnDelete, btnUpdate;
+    private DatabaseReference mDatabase;
+    Calendar calendar = Calendar.getInstance();
+    FirebaseUser userCurrent = FirebaseAuth.getInstance().getCurrentUser();
+    ProgressBar progressBar;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        orderDetail = new Order();
+        orderDetail = (Order) getArguments().getSerializable("order");
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = FragmentUpdateBinding.inflate(inflater, container, false);
-        storageRef = storage.getReference();
-        orderDetail = new Order();
-        orderDetail = (Order) getArguments().getSerializable("order");
-        initView();
+        view = inflater.inflate(R.layout.fragment_update, container, false);
+        initView(view);
+
+
         setListeners();
-        return binding.getRoot();
+        return view;
     }
 
     private void setListeners() {
-        binding.editDate.setOnClickListener(v -> {
+        editDate.setOnClickListener(v -> {
             Calendar now = Calendar.getInstance();
             new DatePickerDialog(requireContext(),
                     (view, year, month, dayOfMonth) -> {
@@ -74,48 +91,69 @@ public class UpdateFragment extends Fragment {
                         now.set(Calendar.MONTH, month);
                         now.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                         orderDetail.setDatePicker(now.getTime());
-                        binding.editDate.setText(orderDetail.getDatePicker());
+                        editDate.setText(orderDetail.getDatePicker());
                     }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH))
                     .show();
         });
-        binding.btnDelete.setOnClickListener(v -> {
-            OrderDatabase.getInstance(requireContext()).deleteOrder(orderDetail);
-            StorageReference desertRef = storageRef.child("images/" + orderDetail.getId() + ".jpg");
-            desertRef.delete().addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Delete Successfully", Toast.LENGTH_SHORT).show()).addOnFailureListener(exception -> Toast.makeText(getContext(), "Delete Failed", Toast.LENGTH_SHORT).show());
-            Navigation.findNavController(binding.getRoot()).navigateUp();
+        btnDelete.setOnClickListener(v -> {
+            mountainImagesRef = storageRef.child("images/" + userCurrent.getUid() + "/" + orderDetail.getThumbnail() + ".jpg");
+            mountainImagesRef.delete().addOnSuccessListener(
+                    aVoid ->
+                    {
+
+                    })
+                    .addOnFailureListener(exception -> {
+
+                            }
+                    );
+            mDatabase.child(userCurrent.getUid()).child(orderDetail.getThumbnail() + "").removeValue();
+            Navigation.findNavController(view).navigateUp();
         });
-        binding.btnUpdate.setOnClickListener(v -> {
-            orderDetail.setItemName(binding.editName.getText().toString());
-            orderDetail.setPrice(Double.parseDouble(binding.editPrice.getText().toString()));
-            mountainImagesRef = storageRef.child("images/" + orderDetail.getId() + ".jpg");
+        btnUpdate.setOnClickListener(v -> {
+            orderDetail.setItemName(editName.getText().toString());
+            orderDetail.setPrice(Long.parseLong(editPrice.getText().toString()));
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("datePicker", orderDetail.getDatePicker());
+            updates.put("itemName", orderDetail.getItemName());
+            updates.put("price", orderDetail.getPrice());
+            updates.put("rating", orderDetail.getRating());
+            mDatabase.child(userCurrent.getUid()).child(orderDetail.getThumbnail() + "").updateChildren(updates);
+            mountainImagesRef = storageRef.child("images/" + userCurrent.getUid() + "/" + orderDetail.getThumbnail() + ".jpg");
             uploadImage();
-            OrderDatabase.getInstance(requireContext()).updateOrder(orderDetail);
-            Navigation.findNavController(binding.getRoot()).navigateUp();
+
         });
-        binding.editRating.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> orderDetail.setRating(rating));
-        binding.imageOrderUpdate.setOnClickListener(v -> {
+        ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> orderDetail.setRating((long) rating));
+        imageOrder.setOnClickListener(v -> {
             Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
             photoPickerIntent.setType("image/*");
             startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
         });
     }
 
-    private void initView() {
-        binding.editName.setText(orderDetail.getItemName());
-        binding.editDate.setText(orderDetail.getDatePicker());
-        binding.editPrice.setText(String.valueOf(orderDetail.getPrice()));
-        binding.editRating.setRating(orderDetail.getRating());
-        storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference();
-        final StorageReference ref = storageRef.child("images/" + orderDetail.getId() + ".jpg");
+    private void initView(View view) {
+        editDate = view.findViewById(R.id.edit_date);
+        editName = view.findViewById(R.id.edit_name);
+        editPrice = view.findViewById(R.id.edit_price);
+        ratingBar = view.findViewById(R.id.edit_rating);
+        imageOrder = view.findViewById(R.id.image_order_update);
+        btnDelete = view.findViewById(R.id.btn_delete);
+        btnUpdate = view.findViewById(R.id.btn_update);
+        progressBar = view.findViewById(R.id.progress_load);
 
-        ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        editName.setText(orderDetail.getItemName());
+        editDate.setText(orderDetail.getDatePicker());
+        editPrice.setText(String.valueOf(orderDetail.getPrice()));
+        ratingBar.setRating(orderDetail.getRating());
+
+        mountainImagesRef = storageRef.child("images/" + userCurrent.getUid() + "/" + orderDetail.getThumbnail() + ".jpg");
+
+        mountainImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
                 Log.d("AppLog", uri.toString());
                 Glide.with(getContext())
                         .load(uri)
-                        .into(binding.imageOrderUpdate);
+                        .into(imageOrder);
             }
 
         });
@@ -126,20 +164,21 @@ public class UpdateFragment extends Fragment {
         if (resultCode == RESULT_OK) {
             if (requestCode == RESULT_LOAD_IMG) {
                 Uri uri = data.getData();
-                binding.imageOrderUpdate.setImageURI(uri);
+                imageOrder.setImageURI(uri);
             }
         }
     }
 
     private void uploadImage() {
-        binding.imageOrderUpdate.setDrawingCacheEnabled(true);
-        binding.imageOrderUpdate.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) binding.imageOrderUpdate.getDrawable()).getBitmap();
+        imageOrder.setDrawingCacheEnabled(true);
+        imageOrder.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable) imageOrder.getDrawable()).getBitmap();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
 
         UploadTask uploadTask = mountainImagesRef.putBytes(data);
+        progressBar.setVisibility(View.VISIBLE);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
@@ -148,8 +187,8 @@ public class UpdateFragment extends Fragment {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
+                Navigation.findNavController(view).navigateUp();
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
