@@ -41,9 +41,23 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     FirebaseStorage storage;
     private List<Order> listOrder =  new ArrayList<>();
-
+    private List<Order> listDisplay = new ArrayList<>();
+    public void search(String search){
+        listDisplay.removeAll(listDisplay);
+        if(search.equals("")){
+            listDisplay.addAll(listOrder);
+        }else {
+            for (Order order : listOrder) {
+                if (order.getItemName().contains(search)) {
+                    listDisplay.add(order);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
     public void setListOrder(List<Order> listOrder) {
-        this.listOrder = listOrder;
+        this.listOrder.addAll(listOrder);
+        this.listDisplay.addAll(listOrder);
         Log.d("AppLog",listOrder.size()+"");
         if(listOrder.isEmpty()){
             onItemClick.stopLoading();
@@ -56,7 +70,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     public OrderAdapter(OnItemClick onItemClick,Context context) {
         this.onItemClick = onItemClick;
         this.context = context;
-        compositeDisposable = new CompositeDisposable();
     }
 
     @NonNull
@@ -69,13 +82,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull OrderViewHolder holder, int position) {
-        holder.bind(listOrder.get(position));
+        holder.bind(listDisplay.get(position));
     }
 
     @Override
     public int getItemCount() {
-
-        return listOrder.size();
+        return listDisplay.size();
     }
 
     public class OrderViewHolder extends RecyclerView.ViewHolder {
@@ -98,7 +110,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     Glide.with(context)
                             .load(uri)
                             .into(binding.imageOrder);
-                    if(listOrder.size()>0 && order.getThumbnail().equals(listOrder.get(listOrder.size() - 1).getThumbnail())){
+                    if(listDisplay.size()>0 && order.getThumbnail().equals(listDisplay.get(listDisplay.size() - 1).getThumbnail())){
                         onItemClick.stopLoading();
                     }
                 }

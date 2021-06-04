@@ -75,15 +75,14 @@ public class MainFragment extends Fragment implements OnItemClick{
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-//                adapter.setListOrder(OrderDatabase.getInstance(requireContext()).searchOrder(query));
-                adapter.notifyDataSetChanged();
+                adapter.search(query);
+                Log.d("AppLog",query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-//                adapter.setListOrder(OrderDatabase.getInstance(requireContext()).searchOrder(newText));
-                adapter.notifyDataSetChanged();
+                adapter.search(newText);
                 return true;
             }
         });
