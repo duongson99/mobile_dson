@@ -6,13 +6,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.appteam.myapplication.R;
-import com.appteam.myapplication.databinding.ItemOrderBinding;
 import com.appteam.myapplication.fragment.OnItemClick;
 import com.appteam.myapplication.model.Order;
 import com.bumptech.glide.Glide;
@@ -76,8 +77,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @NotNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
-        ItemOrderBinding view = ItemOrderBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
-        return new OrderViewHolder(view);
+        return
+                new OrderViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_order,parent,false));
     }
 
     @Override
@@ -91,10 +92,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     }
 
     public class OrderViewHolder extends RecyclerView.ViewHolder {
-        ItemOrderBinding binding;
-        public OrderViewHolder(@NonNull @NotNull ItemOrderBinding itemView) {
-            super(itemView.getRoot());
-            binding = itemView;
+        TextView itemName,price;
+        ImageView imageOrder;
+        public OrderViewHolder(@NonNull @NotNull View itemView) {
+            super(itemView);
+            itemName = itemView.findViewById(R.id.item_name);
+            price = itemView.findViewById(R.id.price);
+            imageOrder = itemView.findViewById(R.id.image_order);
         }
         public void bind(Order order){
             Log.d("AppLog",order.toString());
@@ -109,7 +113,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     Log.d("AppLog",uri.toString());
                     Glide.with(context)
                             .load(uri)
-                            .into(binding.imageOrder);
+                            .into(imageOrder);
                     if(listDisplay.size()>0 && order.getThumbnail().equals(listDisplay.get(listDisplay.size() - 1).getThumbnail())){
                         onItemClick.stopLoading();
                     }
@@ -117,14 +121,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
             });
 
-            binding.itemName.setText(order.getItemName());
-            binding.price.setText(order.getPrice() +" VND");
-            binding.getRoot().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onItemClick.onItemOrderClick(order);
-                }
-            });
+            itemName.setText(order.getItemName());
+            price.setText(order.getPrice() +" VND");
+            itemView.setOnClickListener(v -> onItemClick.onItemOrderClick(order));
         }
     }
 }
